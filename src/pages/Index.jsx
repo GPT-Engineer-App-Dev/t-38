@@ -18,6 +18,8 @@ import { FaTrash } from "react-icons/fa";
 const Index = () => {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editingText, setEditingText] = useState("");
 
   const addTask = () => {
     if (newTask.trim() !== "") {
@@ -36,6 +38,20 @@ const Index = () => {
       i === index ? { ...task, completed: !task.completed } : task
     );
     setTasks(updatedTasks);
+  };
+
+  const startEditing = (index) => {
+    setEditingIndex(index);
+    setEditingText(tasks[index].text);
+  };
+
+  const saveTask = (index) => {
+    const updatedTasks = tasks.map((task, i) =>
+      i === index ? { ...task, text: editingText } : task
+    );
+    setTasks(updatedTasks);
+    setEditingIndex(null);
+    setEditingText("");
   };
 
   return (
@@ -66,13 +82,30 @@ const Index = () => {
               p={2}
               borderRadius="md"
             >
-              <Checkbox
-                isChecked={task.completed}
-                onChange={() => toggleTaskCompletion(index)}
-                mr={2}
-              >
-                <Text as={task.completed ? "s" : ""}>{task.text}</Text>
-              </Checkbox>
+              {editingIndex === index ? (
+                <Input
+                  value={editingText}
+                  onChange={(e) => setEditingText(e.target.value)}
+                  mr={2}
+                />
+              ) : (
+                <Checkbox
+                  isChecked={task.completed}
+                  onChange={() => toggleTaskCompletion(index)}
+                  mr={2}
+                >
+                  <Text as={task.completed ? "s" : ""}>{task.text}</Text>
+                </Checkbox>
+              )}
+              {editingIndex === index ? (
+                <Button onClick={() => saveTask(index)} colorScheme="teal" mr={2}>
+                  Save
+                </Button>
+              ) : (
+                <Button onClick={() => startEditing(index)} colorScheme="blue" mr={2}>
+                  Edit
+                </Button>
+              )}
               <IconButton
                 aria-label="Delete task"
                 icon={<FaTrash />}
