@@ -13,11 +13,13 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { FaTrash } from "react-icons/fa";
+import { FaTrash, FaEdit, FaSave } from "react-icons/fa";
 
 const Index = () => {
   const [tasks, setTasks] = useState([]);
   const [newTask, setNewTask] = useState("");
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editingText, setEditingText] = useState("");
 
   const addTask = () => {
     if (newTask.trim() !== "") {
@@ -36,6 +38,20 @@ const Index = () => {
       i === index ? { ...task, completed: !task.completed } : task
     );
     setTasks(updatedTasks);
+  };
+
+  const startEditing = (index) => {
+    setEditingIndex(index);
+    setEditingText(tasks[index].text);
+  };
+
+  const saveTask = (index) => {
+    const updatedTasks = tasks.map((task, i) =>
+      i === index ? { ...task, text: editingText } : task
+    );
+    setTasks(updatedTasks);
+    setEditingIndex(null);
+    setEditingText("");
   };
 
   return (
@@ -66,19 +82,46 @@ const Index = () => {
               p={2}
               borderRadius="md"
             >
-              <Checkbox
-                isChecked={task.completed}
-                onChange={() => toggleTaskCompletion(index)}
-                mr={2}
-              >
-                <Text as={task.completed ? "s" : ""}>{task.text}</Text>
-              </Checkbox>
-              <IconButton
-                aria-label="Delete task"
-                icon={<FaTrash />}
-                onClick={() => deleteTask(index)}
-                colorScheme="red"
-              />
+              {editingIndex === index ? (
+                <Flex width="100%" alignItems="center">
+                  <Input
+                    value={editingText}
+                    onChange={(e) => setEditingText(e.target.value)}
+                    mr={2}
+                  />
+                  <IconButton
+                    aria-label="Save task"
+                    icon={<FaSave />}
+                    onClick={() => saveTask(index)}
+                    colorScheme="blue"
+                  />
+                </Flex>
+              ) : (
+                <>
+                  <Checkbox
+                    isChecked={task.completed}
+                    onChange={() => toggleTaskCompletion(index)}
+                    mr={2}
+                  >
+                    <Text as={task.completed ? "s" : ""}>{task.text}</Text>
+                  </Checkbox>
+                  <Flex>
+                    <IconButton
+                      aria-label="Edit task"
+                      icon={<FaEdit />}
+                      onClick={() => startEditing(index)}
+                      colorScheme="yellow"
+                      mr={2}
+                    />
+                    <IconButton
+                      aria-label="Delete task"
+                      icon={<FaTrash />}
+                      onClick={() => deleteTask(index)}
+                      colorScheme="red"
+                    />
+                  </Flex>
+                </>
+              )}
             </ListItem>
           ))}
         </List>
